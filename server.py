@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
 import edge_tts
 import asyncio
@@ -30,14 +30,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 @app.route('/')
 def home():
-    return '''
-    <h1>Text to Speech API</h1>
-    <p>Endpoints:</p>
-    <ul>
-        <li>POST /api/tts - Convert text to speech (send JSON with 'text' field)</li>
-        <li>GET /api/example - Try an example conversion</li>
-    </ul>
-    '''
+    return render_template('index.html')
 
 @app.route('/api/tts', methods=['POST'])
 def tts():
@@ -115,7 +108,16 @@ def example():
 if __name__ == '__main__':
     try:
         logger.info("Starting server...")
-        port = int(os.environ.get('PORT', 5000))
+        # Change default port to 5001
+        port = int(os.environ.get('PORT', 5001))
+        logger.info(f"Starting server on port {port}")
         app.run(host='0.0.0.0', port=port)
+    except OSError as e:
+        if "Address already in use" in str(e):
+            logger.error(f"Port {port} is already in use. Try a different port:")
+            logger.error("1. Change the port number in the code")
+            logger.error("2. Or run with a different port: PORT=5002 python server.py")
+        else:
+            logger.error(f"Server failed to start: {str(e)}", exc_info=True)
     except Exception as e:
         logger.error(f"Server failed to start: {str(e)}", exc_info=True)
