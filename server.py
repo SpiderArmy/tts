@@ -22,14 +22,25 @@ def get_ip_address():
         return "127.0.0.1"
 
 app = Flask(__name__)
-# Update CORS configuration
-CORS(app, resources={
-    r"/api/*": {
-        "origins": ["https://your-app-name.onrender.com", "http://localhost:5001"],
-        "methods": ["GET", "POST"],
-        "allow_headers": ["Content-Type"]
+# Update CORS configuration with more explicit settings
+CORS(app, supports_credentials=True, resources={
+    r"/*": {
+        "origins": ["*"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
+        "expose_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
+
+@app.after_request
+def after_request(response):
+    origin = request.headers.get('Origin', '*')
+    response.headers.add('Access-Control-Allow-Origin', origin)
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # Create output directory if it doesn't exist
 OUTPUT_DIR = "output"
