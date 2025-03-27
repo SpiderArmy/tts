@@ -36,8 +36,8 @@
             const audioDiv = document.getElementById('audio');
             
             try {
-                // Update API URL to use port 5001
-                const response = await fetch('http://localhost:5001/api/tts', {
+                // Use relative path instead of hardcoded URL
+                const response = await fetch('/api/tts', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -49,17 +49,23 @@
                     const blob = await response.blob();
                     const url = URL.createObjectURL(blob);
                     
-                    audioDiv.innerHTML = `
-                        <audio controls autoplay>
-                            <source src="${url}" type="audio/mpeg">
-                        </audio>
-                    `;
+                    // Clear previous audio player
+                    audioDiv.innerHTML = '';
+                    
+                    // Create new audio player
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.autoplay = true;
+                    audio.src = url;
+                    
+                    audioDiv.appendChild(audio);
                 } else {
                     const error = await response.json();
-                    alert('Error: ' + error.error);
+                    alert('Error: ' + (error.error || 'Failed to convert text to speech'));
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                console.error('Error:', error);
+                alert('Network error. Please check your connection and try again.');
             }
         }
     </script>
